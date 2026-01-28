@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from db.session import SessionLocal
 from db.models import Question
-from ui_utils import load_css, render_header, render_custom_sidebar
+from app.ui_utils import load_css, render_header, render_custom_sidebar
 from core.auth import AuthManager
 
 st.set_page_config(page_title="Banco de Preguntas | ICFES Sim", page_icon="📚", layout="wide")

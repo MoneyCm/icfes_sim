@@ -1,8 +1,8 @@
 import bcrypt
 import os
 import streamlit as st
-from .session import SessionLocal
-from .models import User
+from db.session import SessionLocal
+from db.models import User
 
 class AuthManager:
     @staticmethod
