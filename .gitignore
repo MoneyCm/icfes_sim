@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.db
+.streamlit/
+icfes_sim.db
+*.pyc

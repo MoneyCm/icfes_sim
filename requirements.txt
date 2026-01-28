@@ -1,0 +1,8 @@
+streamlit
+sqlalchemy
+bcrypt
+pypdf
+google-genai
+python-dotenv
+pandas
+openpyxl
