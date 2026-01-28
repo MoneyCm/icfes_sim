@@ -2,8 +2,9 @@ import streamlit as st
 import sys
 import os
 
-# Adaptación de rutas para el nuevo ecosistema ICFES
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
+# Adaptación de rutas para el nuevo ecosistema ICFES (Fix para Cloud)
+# Agregamos el directorio raíz al path para que encuentre 'db' y 'core'
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from db.session import SessionLocal, init_db
 from db.models import User, UserStats
