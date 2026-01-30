@@ -6,7 +6,7 @@ from google.genai import types
 
 class LLMGenerator:
     """Motor de IA adaptado para el examen ICFES v1.0. Mikey"""
-    def __init__(self, provider="Gemini", api_key="", model_name="gemini-2.0-flash"):
+    def __init__(self, provider="Gemini", api_key="", model_name="gemini-flash-latest"):
         self.provider = provider
         self.api_key = api_key
         self.model_name = model_name
