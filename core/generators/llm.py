@@ -7,14 +7,15 @@ from groq import Groq
 
 class LLMGenerator:
     """Motor de IA adaptado para el examen ICFES v1.0. Mikey"""
-    def __init__(self, provider="Gemini", api_key="", model_name="gemini-2.5-flash"):
+    def __init__(self, provider="Gemini", api_key="", model_name=None):
         self.provider = provider
         self.api_key = api_key
-        self.model_name = model_name
         
         if provider == "Gemini":
+            self.model_name = model_name if model_name else "gemini-2.5-flash"
             self.client = genai.Client(api_key=api_key)
         elif provider == "Groq":
+            self.model_name = model_name if model_name else "llama-3.3-70b-versatile"
             self.client = Groq(api_key=api_key)
 
     def generate_from_text(self, context=None, num_q=5, subject="Matemáticas", difficulty=2, progress_callback=None):
@@ -59,7 +60,7 @@ class LLMGenerator:
         try:
             if self.provider == "Gemini":
                 response = self.client.models.generate_content(
-                    model=self.model_name if self.model_name else "gemini-2.5-flash",
+                    model=self.model_name,
                     contents=prompt,
                     config=types.GenerateContentConfig(response_mime_type="application/json")
                 )
@@ -69,7 +70,7 @@ class LLMGenerator:
             
             elif self.provider == "Groq":
                 response = self.client.chat.completions.create(
-                    model=self.model_name if self.model_name else "llama-3.3-70b-versatile",
+                    model=self.model_name,
                     messages=[
                         {"role": "system", "content": "Eres un experto pedagogo del ICFES. Responde siempre en formato JSON."},
                         {"role": "user", "content": prompt}
