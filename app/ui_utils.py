@@ -15,24 +15,123 @@ def load_css():
         --icfes-blue: #004b93;
         --icfes-orange: #ff6d00;
         --text-main: #1e293b;
+        --text-muted: #64748b;
     }
+    /* =========================================
+       FIX IPHONE / DARK MODE: FORZAR TEMA CLARO
+       ========================================= */
+    
+    /* 1. Fondo Global */
     .stApp {
-        background: radial-gradient(circle at top right, #fcfcfc 0%, #f1f5f9 100%);
+        background-color: #f8fafc !important;
+        color: #1e293b !important;
     }
+
+    /* 2. Textos Globales (Headers, Párrafos, Markdown, Spans) */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, span, div {
+        color: #1e293b !important;
+        text-shadow: none !important;
+    }
+
+    /* 3. Inputs y Widgets (Evitar fondo negro con letra blanca) */
+    .stTextInput input, .stSelectbox, .stMultiSelect {
+        color: #1e293b !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    /* 4. Sidebar (Forzar claro) */
+    section[data-testid="stSidebar"] {
+        background-color: #f1f5f9 !important;
+    }
+    section[data-testid="stSidebar"] *, section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {
+        color: #1e293b !important;
+    }
+    
+    /* 5. Radio Buttons y Checkboxes */
+    div[role="radiogroup"] label p {
+        color: #1e293b !important;
+        font-weight: 500 !important;
+    }
+
     .icfes-card {
-        background: rgba(255,255,255,0.8);
-        border-radius: 20px;
+        background: white !important;
+        border-radius: 15px;
         padding: 20px;
-        border: 1px solid rgba(0,75,147,0.1);
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         margin-bottom: 20px;
+        color: var(--text-main) !important;
     }
+    
     .icfes-header {
         font-weight: 800;
-        color: var(--icfes-blue);
+        color: var(--icfes-blue) !important;
         border-left: 5px solid var(--icfes-orange);
         padding-left: 15px;
         margin-bottom: 10px;
+    }
+
+    /* Asegurar que el sidebar no se pierda */
+    section[data-testid="stSidebar"] {
+        background-color: #f1f5f9 !important;
+    }
+    /* Estilos para las tarjetas de materias (Caja de Herramientas style) */
+    .subject-card {
+        background: white !important;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        text-align: left;
+        position: relative;
+        height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s;
+    }
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .subject-icon {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        background: #f3f4f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        border: 2px solid #e5e7eb;
+    }
+    .subject-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+    .subject-desc {
+        font-size: 0.875rem;
+        color: #4b5563;
+        line-height: 1.25rem;
+        margin-bottom: 16px;
+    }
+    .subject-btn {
+        background-color: #ef4444; /* Rojo ICFES soft */
+        color: white !important;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        display: inline-block;
+        border: none;
     }
     </style>
     """, unsafe_allow_html=True)

@@ -64,7 +64,8 @@ else:
     
     st.progress((idx + 1) / len(questions), text=f"Pregunta {idx + 1} de {len(questions)}")
     
-    st.markdown(f"### {q.subject}")
+    verified_tag = "🛡️ **PREGUNTA OFICIAL**" if q.is_verified else ""
+    st.markdown(f"### {q.subject} {verified_tag}")
     st.markdown(f"<div class='icfes-card'><h4 style='color:#004b93;'>{q.stem}</h4></div>", unsafe_allow_html=True)
     
     # Opciones
@@ -150,7 +151,8 @@ if "show_results" in st.session_state and st.session_state["show_results"]:
         status_color = "#d4edda" if is_correct else "#f8d7da"
         status_border = "#c3e6cb" if is_correct else "#f5c6cb"
         
-        with st.expander(f"{status_icon} Pregunta {i+1}: {q.topic}"):
+        verified_badge = "🛡️ OFICIAL" if q.is_verified else ""
+        with st.expander(f"{status_icon} {verified_badge} Pregunta {i+1}: {q.topic}"):
             st.markdown(f"**{q.stem}**")
             ops = q.options_json
             for k, v in ops.items():

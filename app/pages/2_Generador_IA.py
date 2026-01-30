@@ -11,6 +11,9 @@ from db.models import Question
 from ui_utils import load_css, render_header, render_custom_sidebar
 from core.generators.llm import LLMGenerator
 from core.auth import AuthManager
+from dotenv import load_dotenv
+
+load_dotenv()
 
 st.set_page_config(page_title="Generador IA | ICFES Sim", page_icon="🤖", layout="wide")
 

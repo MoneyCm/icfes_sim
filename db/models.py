@@ -88,3 +88,13 @@ class Achievement(Base):
     unlocked_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now())
 
     user: Mapped[Optional["User"]] = relationship("User", back_populates="achievements")
+
+class ExamStyle(Base):
+    """Almacena el 'ADN Pedagógico' extraído de guías oficiales. Mikey"""
+    __tablename__ = "exam_styles"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True) # Ej: "Guía Matemáticas 2025"
+    subject: Mapped[str] = mapped_column(String)
+    style_dna: Mapped[str] = mapped_column(Text) # Instrucciones comprimidas de estilo
+    is_official: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now())

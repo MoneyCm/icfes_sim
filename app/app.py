@@ -7,7 +7,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from db.session import SessionLocal, init_db
-from db.models import User, UserStats
+from db.models import User, UserStats, Question, Attempt
 from ui_utils import load_css, render_header, render_custom_sidebar, metric_card
 from core.auth import AuthManager
 
@@ -58,38 +58,70 @@ stats = render_custom_sidebar()
 render_header()
 
 st.markdown(f"### 🎯 ¡Hola, {st.session_state['username']}!")
-st.info("Este es tu centro de entrenamiento para el examen ICFES. Aquí podrás practicar por materias y mejorar tu puntaje.")
+st.info("Bienvenido a la **Caja de Herramientas ICFES**. Aquí tienes todo lo necesario para alcanzar tu meta.")
 
-# Métricas rápidas
-c1, c2, c3 = st.columns(3)
-with c1:
-    metric_card("Materias Dominadas", "0/5", "Vamos por todas")
-with c2:
-    metric_card("Preguntas Respondidas", "0", "Hoy es un buen día")
-with c3:
-    metric_card("Puntaje Global Est.", "100/500", "Meta: 400+")
+# Métricas de la Base de Datos
+db_dash = SessionLocal()
+total_q = db_dash.query(Question).count()
+answered_q = db_dash.query(Attempt).filter_by(user_id=st.session_state['user_id']).count()
+db_dash.close()
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    metric_card("Fondo de Saberes", f"{total_q}", "Preguntas disponibles")
+with col2:
+    metric_card("Tu Progreso", f"{answered_q}", "Ejercicios realizados")
+with col3:
+    metric_card("Puntaje Global", f"{stats.total_points if stats else 0} pts", "Nivel: Aspirante")
+
+st.markdown("---")
+st.subheader("🛠️ Caja de Herramientas")
+
+subjects_data = [
+    {"name": "Lectura Crítica", "icon": "📖", "desc": "Fortalece tu comprensión de textos y análisis literario."},
+    {"name": "Matemáticas", "icon": "📐", "desc": "Domina el razonamiento cuantitativo y la resolución de problemas."},
+    {"name": "Sociales y Ciudadanas", "icon": "🌍", "desc": "Analiza contextos históricos, políticos y ciudadanos."},
+    {"name": "Ciencias Naturales", "icon": "🧪", "desc": "Explora fenómenos biológicos, físicos y químicos."},
+    {"name": "Inglés", "icon": "🇬🇧", "desc": "Mejora tus habilidades comunicativas en lengua extranjera."}
+]
+
+# Grid de 3 columnas
+cols = st.columns(3)
+for i, sub in enumerate(subjects_data):
+    with cols[i % 3]:
+        st.markdown(f"""
+        <div class="subject-card">
+            <div class="subject-icon">{sub['icon']}</div>
+            <div>
+                <div class="subject-title">{sub['name']}</div>
+                <div class="subject-desc">{sub['desc']}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <a href="/Nuevo_Simulacro" target="_self" class="subject-btn">Práctica Rápida</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # Nota: Los links internos en Streamlit a veces requieren query params o st.page_link para funcionar bien.
+        # Usamos st.page_link para mayor confiabilidad debajo del HTML
+        st.page_link("pages/1_Nuevo_Simulacro.py", label=f"Entrenar {sub['name']}", icon=sub['icon'])
 
 st.divider()
-st.markdown("### 🚀 Acciones Rápidas")
-col_a, col_b, col_c, col_d = st.columns(4)
-with col_a:
-    st.page_link("pages/1_Nuevo_Simulacro.py", label="Nuevo Simulacro", icon="🚀", use_container_width=True)
-with col_b:
-    st.page_link("pages/4_Entrenamiento_Oficial.py", label="Entrenamiento Oficial", icon="📖", use_container_width=True)
-with col_c:
-    st.page_link("pages/2_Generador_IA.py", label="Generador IA", icon="🤖", use_container_width=True)
-with col_d:
-    st.page_link("pages/3_Banco_Preguntas.py", label="Mi Banco", icon="📚", use_container_width=True)
-
-st.divider()
-st.markdown("### 🏆 Ranking de Amigos")
+st.markdown("### 🏆 Ranking Regional")
 db_r = SessionLocal()
 top_users = db_r.query(User, UserStats).join(UserStats).order_by(UserStats.total_points.desc()).limit(5).all()
 db_r.close()
 
 if top_users:
+    cols_rank = st.columns(5)
     for i, (u_obj, s_obj) in enumerate(top_users):
-        medal = {0: "🥇", 1: "🥈", 2: "🥉"}.get(i, "👤")
-        st.markdown(f"{medal} **{u_obj.username}**: {s_obj.total_points} pts")
+        with cols_rank[i]:
+            medal = {0: "🥇", 1: "🥈", 2: "🥉"}.get(i, "👤")
+            st.markdown(f"""
+            <div class="icfes-card" style='text-align:center;'>
+                <div style='font-size: 2rem;'>{medal}</div>
+                <div style='font-weight: 700;'>{u_obj.username}</div>
+                <div style='color: #ff6d00; font-weight: 800;'>{s_obj.total_points}</div>
+            </div>
+            """, unsafe_allow_html=True)
 else:
-    st.info("Aún no hay puntos registrados. ¡Sé el primero en el podio!")
+    st.info("Aún no hay puntos registrados. ¡Sé el primero!")

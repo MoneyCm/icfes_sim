@@ -53,7 +53,8 @@ if not questions:
 else:
     for q in questions:
         icon = {1: "🟢", 2: "🟡", 3: "🔴"}[q.difficulty]
-        with st.expander(f"{icon} [{q.subject}] {q.stem[:80]}..."):
+        verified_badge = "🛡️ OFICIAL" if q.is_verified else ""
+        with st.expander(f"{icon} {verified_badge} [{q.subject}] {q.stem[:80]}..."):
             st.markdown(f"**Enunciado:**\n{q.stem}")
             
             ops = q.options_json
