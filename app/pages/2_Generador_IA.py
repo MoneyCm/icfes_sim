@@ -31,7 +31,7 @@ with st.container():
     col1, col2, col3 = st.columns(3)
     with col1:
         subject = st.selectbox("Materia", ["Matemáticas", "Lectura Crítica", "Ciencias Naturales", "Sociales y Ciudadanas", "Inglés"])
-        num_q = st.slider("Número de preguntas", 1, 10, 5)
+        num_q = st.slider("Número de preguntas", 1, 50, 10)
     
     with col2:
         ai_provider = st.selectbox("Proveedor de IA", ["Gemini", "Groq"])
@@ -63,11 +63,17 @@ with st.container():
         elif gen_mode == "Usar un texto de referencia" and len(source_text) < 50:
             st.warning("📋 El texto es muy corto para generar preguntas de calidad.")
         else:
+            prog_placeholder = st.empty()
             with st.spinner(f"{ai_provider} está creando tus preguntas..."):
                 gen = LLMGenerator(provider=ai_provider, api_key=api_key)
                 context_to_use = source_text if gen_mode == "Usar un texto de referencia" else None
-                questions = gen.generate_from_text(context_to_use, num_q=num_q, subject=subject, difficulty=diff_val)
                 
+                def update_prog(current, total):
+                    perc = int((current / total) * 100)
+                    prog_placeholder.progress(current / total, text=f"📥 Generando: {current}/{total} preguntas...")
+
+                questions = gen.generate_from_text(context_to_use, num_q=num_q, subject=subject, difficulty=diff_val, progress_callback=update_prog)
+                prog_placeholder.empty()
                 if questions:
                     db = SessionLocal()
                     saved_count = 0

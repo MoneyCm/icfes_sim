@@ -113,10 +113,65 @@ else:
                 
                 st.session_state["last_score"] = (correct / total) * 100
                 st.session_state["quiz_active"] = False
+                st.session_state["show_results"] = True
+                st.session_state["last_results_data"] = {
+                    "total": total,
+                    "correct": correct,
+                    "points": points_won,
+                    "summary_questions": questions,
+                    "user_answers": st.session_state["answers"]
+                }
                 st.balloons()
-                st.success(f"¡Simulacro Terminado! Puntaje: {correct}/{total} ({st.session_state['last_score']:.1f}%)")
-                st.info(f"🏆 ¡Acabas de ganar {points_won} puntos para tu rango!")
-                if st.button("🏠 Volver al Inicio"):
-                    st.rerun()
+                st.rerun()
+
+# MOSTRAR RESULTADOS DETALLADOS
+if "show_results" in st.session_state and st.session_state["show_results"]:
+    res = st.session_state["last_results_data"]
+    
+    st.markdown("<div class='icfes-card' style='text-align:center;'>", unsafe_allow_html=True)
+    st.header("📊 Resultados del Simulacro")
+    
+    col_r1, col_r2, col_r3 = st.columns(3)
+    with col_r1:
+        metric_card("Preguntas", f"{res['correct']}/{res['total']}", "Total contestadas")
+    with col_r2:
+        metric_card("Puntaje", f"{(res['correct']/res['total'])*100:.1f}%", "Efectividad")
+    with col_r3:
+        metric_card("Puntos Ganados", f"+{res['points']}", "Bonus académico")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.subheader("📝 Revisión Detallada")
+    
+    for i, q in enumerate(res["summary_questions"]):
+        ans = res["user_answers"].get(q.question_id)
+        is_correct = (ans == q.correct_key)
+        
+        status_icon = "✅" if is_correct else "❌"
+        status_color = "#d4edda" if is_correct else "#f8d7da"
+        status_border = "#c3e6cb" if is_correct else "#f5c6cb"
+        
+        with st.expander(f"{status_icon} Pregunta {i+1}: {q.topic}"):
+            st.markdown(f"**{q.stem}**")
+            ops = q.options_json
+            for k, v in ops.items():
+                if k == q.correct_key:
+                    st.markdown(f"🟢 **{k}) {v}** (Correcta)")
+                elif k == ans and not is_correct:
+                    st.markdown(f"🔴 **{k}) {v}** (Tu elección)")
+                else:
+                    st.write(f"{k}) {v}")
+            
+            st.divider()
+            st.info(f"💡 **Explicación:** {q.rationale}")
+
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("🔄 Nuevo Simulacro", use_container_width=True):
+            del st.session_state["show_results"]
+            st.rerun()
+    with col_btn2:
+        if st.button("🏠 Ir al Dashboard", type="primary", use_container_width=True):
+            del st.session_state["show_results"]
+            st.switch_page("app.py")
 
 db.close()

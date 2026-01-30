@@ -60,11 +60,18 @@ if uploaded_file:
                     st.error("No se pudo extraer suficiente texto del PDF. Asegúrate de que no sea solo una imagen.")
                 else:
                     # Usamos el generador optimizado
-                    gen = LLMGenerator(api_key=api_key)
                     # Limitamos el contexto para no saturar la API, tomando una muestra representativa o permitiendo que la IA analice
                     # Para este MVP, tomamos los primeros 25000 chars (aprox 10-15 paginas densas)
-                    questions = gen.generate_from_text(text_context[:25000], num_q=num_q, subject=subject, difficulty=diff_val)
-                    
+                    prog_placeholder = st.empty()
+            with st.spinner("La IA está procesando la guía oficial..."):
+                gen = LLMGenerator(api_key=api_key)
+                
+                def update_prog(current, total):
+                    prog_placeholder.progress(current / total, text=f"📥 Procesando guía: {current}/{total} preguntas...")
+
+                questions = gen.generate_from_text(text_context, num_q=num_q, subject=subject, difficulty=diff_val, progress_callback=update_prog)
+                prog_placeholder.empty()
+    
                     if questions:
                         db = SessionLocal()
                         saved = 0
