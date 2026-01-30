@@ -14,23 +14,25 @@ class LLMGenerator:
         if provider == "Gemini":
             self.client = genai.Client(api_key=api_key)
 
-    def generate_from_text(self, context, num_q=5, subject="Matemáticas", difficulty=2, progress_callback=None):
-        """Genera preguntas estilo ICFES (4 opciones) basadas en un texto de referencia. Mikey"""
+    def generate_from_text(self, context=None, num_q=5, subject="Matemáticas", difficulty=2, progress_callback=None):
+        """Genera preguntas estilo ICFES (4 opciones). Si hay context, lo usa; si no, usa su conocimiento. Mikey"""
         
         diff_label = {1: "Básico", 2: "Intermedio", 3: "Avanzado"}[difficulty]
         
+        if context:
+            source_instruction = f"basadas EXCLUSIVAMENTE en el siguiente texto de referencia:\n\nTEXTO DE REFERENCIA:\n\"\"\"{context}\"\"\""
+        else:
+            source_instruction = "basadas en tu amplio conocimiento pedagógico sobre los temas evaluados en el ICFES para esta materia."
+
         prompt = f"""
         Eres un experto pedagogo diseñando el examen ICFES (grado 11) para Colombia.
-        Tu tarea es crear {num_q} preguntas de selección múltiple basadas EXCLUSIVAMENTE en el siguiente texto de referencia.
-
-        TEXTO DE REFERENCIA:
-        \"\"\"{context}\"\"\"
+        Tu tarea es crear {num_q} preguntas de selección múltiple {source_instruction}
 
         REGLAS DE ORO (Protocolo ICFES):
         1. MATERIA: {subject}.
         2. DIFICULTAD: {diff_label}.
         3. FORMATO: Cada pregunta DEBE tener:
-           - Un enunciado (puedes plantear un caso o situación).
+           - Un enunciado (puedes plantear un caso o situación o usar conceptos base).
            - 4 OPCIONES MARCADAS COMO A, B, C, D (Solo una correcta).
            - Una justificación técnica de por qué la correcta es la correcta.
         4. ESTILO: Lenguaje académico pero comprensible para estudiantes de 16-18 años.
@@ -41,7 +43,7 @@ class LLMGenerator:
             {{
               "subject": "{subject}",
               "competency": "Competencia evaluada (ej: Razonamiento, Uso del conocimiento)",
-              "topic": "Tema detectado del texto",
+              "topic": "Tema específico de la pregunta",
               "stem": "Enunciado de la pregunta",
               "options": {{ "A": "...", "B": "...", "C": "...", "D": "..." }},
               "correct_key": "Letra de la correcta (A, B, C o D)",

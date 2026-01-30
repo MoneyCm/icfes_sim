@@ -38,18 +38,25 @@ with st.container():
         difficulty = st.select_slider("Nivel de dificultad", options=["Básico", "Intermedio", "Avanzado"], value="Intermedio")
         diff_val = {"Básico": 1, "Intermedio": 2, "Avanzado": 3}[difficulty]
 
-    st.markdown("#### 📄 Texto de Referencia")
-    source_text = st.text_area("Pega aquí el texto, lectura o ejercicio del cual quieres generar preguntas:", height=200)
+    st.markdown("#### 📄 Modalidad de Generación")
+    gen_mode = st.radio("¿Cómo quieres generar las preguntas?", ["Usar un texto de referencia", "Generación libre (Conocimiento de la IA)"], horizontal=True)
+
+    source_text = ""
+    if gen_mode == "Usar un texto de referencia":
+        source_text = st.text_area("Pega aquí el texto, lectura o ejercicio del cual quieres generar preguntas:", height=150)
+    else:
+        st.info("💡 La IA generará preguntas basadas en los estándares oficiales del ICFES para la materia seleccionada.")
 
     if st.button("✨ Generar con IA", type="primary", use_container_width=True):
         if not api_key:
             st.error("🔑 Falta la API Key.")
-        elif len(source_text) < 50:
+        elif gen_mode == "Usar un texto de referencia" and len(source_text) < 50:
             st.warning("📋 El texto es muy corto para generar preguntas de calidad.")
         else:
-            with st.spinner("La IA está leyendo y creando tus preguntas..."):
+            with st.spinner("La IA está creando tus preguntas..."):
                 gen = LLMGenerator(api_key=api_key)
-                questions = gen.generate_from_text(source_text, num_q=num_q, subject=subject, difficulty=diff_val)
+                context_to_use = source_text if gen_mode == "Usar un texto de referencia" else None
+                questions = gen.generate_from_text(context_to_use, num_q=num_q, subject=subject, difficulty=diff_val)
                 
                 if questions:
                     db = SessionLocal()
