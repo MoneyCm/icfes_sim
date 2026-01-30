@@ -3,6 +3,7 @@ import time
 import streamlit as st
 from google import genai
 from google.genai import types
+from groq import Groq
 
 class LLMGenerator:
     """Motor de IA adaptado para el examen ICFES v1.0. Mikey"""
@@ -13,6 +14,8 @@ class LLMGenerator:
         
         if provider == "Gemini":
             self.client = genai.Client(api_key=api_key)
+        elif provider == "Groq":
+            self.client = Groq(api_key=api_key)
 
     def generate_from_text(self, context=None, num_q=5, subject="Matemáticas", difficulty=2, progress_callback=None):
         """Genera preguntas estilo ICFES (4 opciones). Si hay context, lo usa; si no, usa su conocimiento. Mikey"""
@@ -54,17 +57,31 @@ class LLMGenerator:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(response_mime_type="application/json")
-            )
+            if self.provider == "Gemini":
+                response = self.client.models.generate_content(
+                    model=self.model_name if self.model_name else "gemini-2.5-flash",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(response_mime_type="application/json")
+                )
+                if response and response.text:
+                    data = json.loads(response.text)
+                    return data.get("questions", [])
             
-            if response and response.text:
-                data = json.loads(response.text)
-                return data.get("questions", [])
+            elif self.provider == "Groq":
+                response = self.client.chat.completions.create(
+                    model=self.model_name if self.model_name else "llama-3.3-70b-versatile",
+                    messages=[
+                        {"role": "system", "content": "Eres un experto pedagogo del ICFES. Responde siempre en formato JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={"type": "json_object"}
+                )
+                if response and response.choices:
+                    data = json.loads(response.choices[0].message.content)
+                    return data.get("questions", [])
+
         except Exception as e:
-            st.error(f"Error en la IA: {e}")
+            st.error(f"Error en la IA ({self.provider}): {e}")
             return []
         
         return []

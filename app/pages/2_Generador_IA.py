@@ -28,15 +28,25 @@ with st.container():
         <h3 class='icfes-header'>Configuración del Reto</h3>
     """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         subject = st.selectbox("Materia", ["Matemáticas", "Lectura Crítica", "Ciencias Naturales", "Sociales y Ciudadanas", "Inglés"])
         num_q = st.slider("Número de preguntas", 1, 10, 5)
     
     with col2:
-        api_key = st.text_input("Gemini API Key", type="password", help="Obtén tu clave gratis en Google AI Studio")
+        ai_provider = st.selectbox("Proveedor de IA", ["Gemini", "Groq"])
         difficulty = st.select_slider("Nivel de dificultad", options=["Básico", "Intermedio", "Avanzado"], value="Intermedio")
         diff_val = {"Básico": 1, "Intermedio": 2, "Avanzado": 3}[difficulty]
+
+    with col3:
+        # Intentar obtener API Key de .env si no está en session_state
+        default_key = ""
+        if ai_provider == "Gemini":
+            default_key = os.getenv("GEMINI_API_KEY", "")
+        else:
+            default_key = os.getenv("GROQ_API_KEY", "")
+            
+        api_key = st.text_input(f"{ai_provider} API Key", value=default_key, type="password")
 
     st.markdown("#### 📄 Modalidad de Generación")
     gen_mode = st.radio("¿Cómo quieres generar las preguntas?", ["Usar un texto de referencia", "Generación libre (Conocimiento de la IA)"], horizontal=True)
@@ -45,16 +55,16 @@ with st.container():
     if gen_mode == "Usar un texto de referencia":
         source_text = st.text_area("Pega aquí el texto, lectura o ejercicio del cual quieres generar preguntas:", height=150)
     else:
-        st.info("💡 La IA generará preguntas basadas en los estándares oficiales del ICFES para la materia seleccionada.")
+        st.info(f"💡 {ai_provider} generará preguntas basadas en los estándares oficiales del ICFES.")
 
     if st.button("✨ Generar con IA", type="primary", use_container_width=True):
         if not api_key:
-            st.error("🔑 Falta la API Key.")
+            st.error(f"🔑 Falta la API Key de {ai_provider}.")
         elif gen_mode == "Usar un texto de referencia" and len(source_text) < 50:
             st.warning("📋 El texto es muy corto para generar preguntas de calidad.")
         else:
-            with st.spinner("La IA está creando tus preguntas..."):
-                gen = LLMGenerator(api_key=api_key)
+            with st.spinner(f"{ai_provider} está creando tus preguntas..."):
+                gen = LLMGenerator(provider=ai_provider, api_key=api_key)
                 context_to_use = source_text if gen_mode == "Usar un texto de referencia" else None
                 questions = gen.generate_from_text(context_to_use, num_q=num_q, subject=subject, difficulty=diff_val)
                 
