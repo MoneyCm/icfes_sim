@@ -34,7 +34,7 @@ with st.container():
         num_q = st.slider("Número de preguntas", 1, 50, 10)
     
     with col2:
-        ai_provider = st.selectbox("Proveedor de IA", ["Gemini", "Groq"])
+        ai_provider = st.selectbox("Proveedor de IA", ["Gemini", "Groq", "Mistral"])
         difficulty = st.select_slider("Nivel de dificultad", options=["Básico", "Intermedio", "Avanzado"], value="Intermedio")
         diff_val = {"Básico": 1, "Intermedio": 2, "Avanzado": 3}[difficulty]
 
@@ -43,8 +43,10 @@ with st.container():
         default_key = ""
         if ai_provider == "Gemini":
             default_key = os.getenv("GEMINI_API_KEY", "")
-        else:
+        elif ai_provider == "Groq":
             default_key = os.getenv("GROQ_API_KEY", "")
+        else:
+            default_key = os.getenv("MISTRAL_API_KEY", "")
             
         api_key = st.text_input(f"{ai_provider} API Key", value=default_key, type="password")
 

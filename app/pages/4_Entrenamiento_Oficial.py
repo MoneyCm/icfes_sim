@@ -43,9 +43,16 @@ if uploaded_file:
             subject = st.selectbox("Materia a extraer", ["Matemáticas", "Lectura Crítica", "Ciencias Naturales", "Sociales y Ciudadanas", "Inglés"])
             num_q = st.slider("Preguntas a generar", 1, 15, 5)
         with col2:
-            api_key = st.text_input("Gemini API Key", type="password")
+            ai_provider = st.selectbox("Proveedor de IA", ["Gemini", "Groq", "Mistral"])
             difficulty = st.select_slider("Dificultad", options=["Básico", "Intermedio", "Avanzado"], value="Intermedio")
             diff_val = {"Básico": 1, "Intermedio": 2, "Avanzado": 3}[difficulty]
+            
+            default_key = ""
+            if ai_provider == "Gemini": default_key = os.getenv("GEMINI_API_KEY", "")
+            elif ai_provider == "Groq": default_key = os.getenv("GROQ_API_KEY", "")
+            else: default_key = os.getenv("MISTRAL_API_KEY", "")
+            
+            api_key = st.text_input(f"{ai_provider} API Key", value=default_key, type="password")
 
     if st.button("🚀 Procesar Guía y Generar Preguntas", type="primary", use_container_width=True):
         if not api_key:
@@ -64,7 +71,7 @@ if uploaded_file:
                     # Para este MVP, tomamos los primeros 25000 chars (aprox 10-15 paginas densas)
                     prog_placeholder = st.empty()
             with st.spinner("La IA está procesando la guía oficial..."):
-                gen = LLMGenerator(api_key=api_key)
+                gen = LLMGenerator(provider=ai_provider, api_key=api_key)
                 
                 def update_prog(current, total):
                     prog_placeholder.progress(current / total, text=f"📥 Procesando guía: {current}/{total} preguntas...")

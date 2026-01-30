@@ -4,6 +4,7 @@ import streamlit as st
 from google import genai
 from google.genai import types
 from groq import Groq
+from mistralai import Mistral
 
 class LLMGenerator:
     """Motor de IA adaptado para el examen ICFES v1.0. Mikey"""
@@ -17,6 +18,9 @@ class LLMGenerator:
         elif provider == "Groq":
             self.model_name = model_name if model_name else "llama-3.3-70b-versatile"
             self.client = Groq(api_key=api_key)
+        elif provider == "Mistral":
+            self.model_name = model_name if model_name else "mistral-large-latest"
+            self.client = Mistral(api_key=api_key)
 
     def generate_from_text(self, context=None, num_q=5, subject="Matemáticas", difficulty=2, progress_callback=None):
         """Genera preguntas estilo ICFES (4 opciones) con soporte para lotes grandes. Mikey"""
@@ -100,6 +104,19 @@ class LLMGenerator:
                         data = json.loads(response.choices[0].message.content)
                         batch_questions = data.get("questions", [])
 
+                elif self.provider == "Mistral":
+                    response = self.client.chat.complete(
+                        model=self.model_name,
+                        messages=[
+                            {"role": "system", "content": "Eres un experto pedagogo del ICFES. Responde siempre con el número exacto de preguntas en formato JSON."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        response_format={"type": "json_object"}
+                    )
+                    if response and response.choices:
+                        data = json.loads(response.choices[0].message.content)
+                        batch_questions = data.get("questions", [])
+
                 all_questions.extend(batch_questions)
                 remaining -= len(batch_questions)
                 
@@ -108,7 +125,12 @@ class LLMGenerator:
                     break
                     
             except Exception as e:
-                st.error(f"Error en el lote ({self.provider}): {e}")
+                err_msg = str(e)
+                if "rate_limit_exceeded" in err_msg or "429" in err_msg:
+                    st.error(f"⚠️ **Límite de cuota alcanzado en {self.provider}**")
+                    st.info("💡 Tu cuota diaria gratuita se ha agotado. Te recomiendo **cambiar al otro proveedor** para seguir practicando.")
+                else:
+                    st.error(f"Error en el lote ({self.provider}): {e}")
                 break
         
         return all_questions
