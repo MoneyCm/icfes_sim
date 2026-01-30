@@ -62,6 +62,7 @@ with st.container():
                         if not db.query(Question).filter_by(hash_norm=q_hash).first():
                             new_q = Question(
                                 subject=q_data['subject'],
+                                competency=q_data.get('competency', 'General'),
                                 topic=q_data['topic'],
                                 stem=q_data['stem'],
                                 options_json=q_data['options'],

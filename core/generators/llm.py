@@ -40,6 +40,7 @@ class LLMGenerator:
           "questions": [
             {{
               "subject": "{subject}",
+              "competency": "Competencia evaluada (ej: Razonamiento, Uso del conocimiento)",
               "topic": "Tema detectado del texto",
               "stem": "Enunciado de la pregunta",
               "options": {{ "A": "...", "B": "...", "C": "...", "D": "..." }},
