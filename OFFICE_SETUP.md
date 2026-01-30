@@ -46,5 +46,35 @@ Antes de apagar la oficina para volver a casa:
 
 ---
 
-> [!IMPORTANT]
-> **No te preocupes por la Base de Datos**: Como usamos Supabase, si tu hijo registra una pregunta desde casa mientras tú estás en la oficina, la verás aparecer en el ranking al instante sin hacer nada. ¡Los datos viven en internet! 🛡️🎯💎
+## 🆘 ¿Qué pasa si el código de mi oficina está desactualizado? (Rescate)
+
+Si ya estuviste trabajando en la oficina y tienes miedo de perder esos cambios al bajar la versión "maestra" de GitHub, sigue este protocolo de seguridad:
+
+### Paso 1: Guarda tus cambios locales (Protección)
+En la terminal de tu oficina:
+```powershell
+git add .
+git commit -m "Mis cambios locales de la oficina antes de sincronizar"
+```
+
+### Paso 2: Trae la versión de "Cali/Casa" (Sincronización)
+```powershell
+git pull origin main
+```
+
+### Paso 3: Resolver Conflictos (Si aparecen)
+Si Git te dice que hay "Conflicts", no entres en pánico. 
+- Abre los archivos marcados. 
+- Verás marcas como `<<<<<< HEAD`. 
+- Elige lo que quieras conservar y borra las marcas.
+- Luego: `git add .` y `git commit -m "Conflictos resueltos"`.
+
+---
+
+> [!TIP]
+> **Recomendación Mikey**: A partir de ahora, haz que sea un hábito:
+> 1. LLego a la oficina -> `git pull`
+> 2. Me voy de la oficina -> `git push`
+> 3. Llego a casa -> `git pull`
+> 4. Me voy a dormir -> `git push`
+> Así nunca tendrás versiones diferentes. 🛡️🎯💎

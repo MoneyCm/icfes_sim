@@ -1,5 +1,11 @@
 import streamlit as st
 import os
+import sys
+
+# Asegurar que los módulos 'db' y 'core' sean visibles desde cualquier nivel
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_path not in sys.path:
+    sys.path.append(root_path)
 
 def load_css():
     """Carga los estilos premium adaptados para estudiantes (Azul/Naranja ICFES). Mikey"""

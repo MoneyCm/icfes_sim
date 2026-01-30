@@ -6,10 +6,11 @@ import time
 
 # Adaptación para navegación de páginas
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from db.session import SessionLocal
 from db.models import Question, Attempt, UserStats
-from app.ui_utils import load_css, render_header, render_custom_sidebar, metric_card
+from ui_utils import load_css, render_header, render_custom_sidebar, metric_card
 from core.auth import AuthManager
 
 st.set_page_config(page_title="Simulacro | ICFES Sim", page_icon="📝", layout="wide")
