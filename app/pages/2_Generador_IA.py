@@ -77,30 +77,40 @@ with st.container():
                 if questions:
                     db = SessionLocal()
                     saved_count = 0
+                    seen_hashes = set()
+                    
                     for q_data in questions:
                         # Crear hash para evitar duplicados
                         import hashlib
                         q_hash = hashlib.md5((q_data['stem'] + q_data['correct_key']).encode()).hexdigest()
                         
-                        if not db.query(Question).filter_by(hash_norm=q_hash).first():
-                            new_q = Question(
-                                subject=q_data['subject'],
-                                competency=q_data.get('competency', 'General'),
-                                topic=q_data['topic'],
-                                stem=q_data['stem'],
-                                options_json=q_data['options'],
-                                correct_key=q_data['correct_key'],
-                                rationale=q_data['rationale'],
-                                difficulty=diff_val,
-                                hash_norm=q_hash
-                            )
-                            db.add(new_q)
-                            saved_count += 1
+                        # Evitar duplicados en el mismo lote y en la base de datos
+                        if q_hash not in seen_hashes:
+                            if not db.query(Question).filter_by(hash_norm=q_hash).first():
+                                new_q = Question(
+                                    subject=q_data['subject'],
+                                    competency=q_data.get('competency', 'General'),
+                                    topic=q_data['topic'],
+                                    stem=q_data['stem'],
+                                    options_json=q_data['options'],
+                                    correct_key=q_data['correct_key'],
+                                    rationale=q_data['rationale'],
+                                    difficulty=diff_val,
+                                    hash_norm=q_hash
+                                )
+                                db.add(new_q)
+                                saved_count += 1
+                                seen_hashes.add(q_hash)
                     
-                    db.commit()
-                    db.close()
-                    st.success(f"✅ ¡Se han generado {len(questions)} preguntas y guardado {saved_count} nuevas en el banco!")
-                    st.session_state["last_gen_questions"] = questions
+                    try:
+                        db.commit()
+                        st.success(f"✅ ¡Se han generado {len(questions)} preguntas y guardado {saved_count} nuevas en el banco!")
+                        st.session_state["last_gen_questions"] = questions
+                    except Exception as e:
+                        db.rollback()
+                        st.error(f"❌ Error de base de datos: {e}")
+                    finally:
+                        db.close()
                 else:
                     st.error("Hubo un problema al generar las preguntas.")
 

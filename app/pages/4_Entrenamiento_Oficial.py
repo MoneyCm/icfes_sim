@@ -72,11 +72,13 @@ if uploaded_file:
                 questions = gen.generate_from_text(text_context, num_q=num_q, subject=subject, difficulty=diff_val, progress_callback=update_prog)
                 prog_placeholder.empty()
     
-                    if questions:
-                        db = SessionLocal()
-                        saved = 0
-                        for q_data in questions:
-                            q_hash = hashlib.md5((q_data['stem'] + q_data['correct_key']).encode()).hexdigest()
+                if questions:
+                    db = SessionLocal()
+                    saved = 0
+                    seen_hashes = set()
+                    for q_data in questions:
+                        q_hash = hashlib.md5((q_data['stem'] + q_data['correct_key']).encode()).hexdigest()
+                        if q_hash not in seen_hashes:
                             if not db.query(Question).filter_by(hash_norm=q_hash).first():
                                 new_q = Question(
                                     subject=q_data['subject'],
@@ -91,9 +93,15 @@ if uploaded_file:
                                 )
                                 db.add(new_q)
                                 saved += 1
+                                seen_hashes.add(q_hash)
+                    try:
                         db.commit()
-                        db.close()
                         st.success(f"🎯 ¡Éxito! Se han creado {saved} preguntas de alta fidelidad basadas en la guía oficial.")
                         st.balloons()
-                    else:
-                        st.error("La IA no pudo procesar la guía. Intenta de nuevo.")
+                    except Exception as e:
+                        db.rollback()
+                        st.error(f"❌ Error al guardar datos: {e}")
+                    finally:
+                        db.close()
+                else:
+                    st.error("La IA no pudo procesar la guía. Intenta de nuevo.")
